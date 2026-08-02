@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Трекер часу</title>
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<meta name="theme-color" content="#0f172a">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<header class="topbar">
+  <h1>Трекер часу</h1>
+  <button id="tab-settings-btn" class="icon-btn" title="Налаштування">⚙</button>
+</header>
+
+<nav class="tabs">
+  <button class="tab-btn active" data-tab="timer">Таймер</button>
+  <button class="tab-btn" data-tab="manual">Ручний запис</button>
+  <button class="tab-btn" data-tab="history">Історія</button>
+</nav>
+
+<main>
+
+  <section id="tab-timer" class="tab-panel active">
+    <div class="card">
+      <label for="timer-client">Клієнт</label>
+      <input id="timer-client" type="text" list="clients-list" placeholder="Напр. Dubbel.ai">
+      <label for="timer-project">Проєкт</label>
+      <input id="timer-project" type="text" list="projects-list" placeholder="Напр. PXR Assist">
+      <label for="timer-activity">Активність</label>
+      <input id="timer-activity" type="text" placeholder="Напр. Onboarding">
+      <label class="checkbox-row"><input id="timer-billable" type="checkbox" checked> Billable</label>
+
+      <div class="timer-display" id="timer-display">00:00:00</div>
+      <div class="timer-meta" id="timer-meta"></div>
+
+      <button id="timer-start-btn" class="btn primary">Старт (зараз)</button>
+      <button id="timer-stop-btn" class="btn danger hidden">Стоп</button>
+
+      <p class="hint">Округлений час: минулий/поточний — старт одразу, майбутній — запланований старт із підтвердженням:</p>
+      <div class="slot-buttons" id="timer-quick-slots"></div>
+      <p class="status-msg" id="planned-status"></p>
+      <div id="planned-active-list"></div>
+    </div>
+  </section>
+
+  <section id="tab-manual" class="tab-panel">
+    <div class="card">
+      <label for="manual-date">Дата</label>
+      <input id="manual-date" type="date">
+      <label for="manual-client">Клієнт</label>
+      <input id="manual-client" type="text" list="clients-list">
+      <label for="manual-project">Проєкт</label>
+      <input id="manual-project" type="text" list="projects-list">
+      <label for="manual-activity">Активність</label>
+      <input id="manual-activity" type="text">
+      <label for="manual-hours">Години</label>
+      <input id="manual-hours" type="number" step="0.25" min="0" placeholder="напр. 2.5">
+      <label class="checkbox-row"><input id="manual-billable" type="checkbox" checked> Billable</label>
+      <label for="manual-note">Нотатка</label>
+      <input id="manual-note" type="text" placeholder="необов'язково">
+      <button id="manual-submit-btn" class="btn primary">Додати запис</button>
+      <p class="status-msg" id="manual-status"></p>
+    </div>
+  </section>
+
+  <section id="tab-history" class="tab-panel">
+    <div class="card">
+      <div class="history-actions">
+        <button id="history-refresh-btn" class="btn secondary">Оновити</button>
+        <a href="https://docs.google.com/spreadsheets/d/17NWyyzTBk-q7WeFfjGV7BC2TTZ4whDuEkIOlQwe9CM0/edit" target="_blank" rel="noopener" class="btn secondary">Відкрити таблицю ↗</a>
+      </div>
+      <table class="entries-table">
+        <thead>
+          <tr><th>Дата</th><th>Клієнт</th><th>Проєкт</th><th>Год.</th><th>Сума</th><th>Статус</th></tr>
+        </thead>
+        <tbody id="entries-tbody"></tbody>
+      </table>
+    </div>
+  </section>
+
+</main>
+
+<div id="settings-modal" class="modal hidden">
+  <div class="modal-content">
+    <h2>Налаштування</h2>
+    <label for="settings-script-url">URL Apps Script (Web App)</label>
+    <input id="settings-script-url" type="text" placeholder="https://script.google.com/macros/s/XXXX/exec">
+    <label for="settings-user">Ім'я користувача</label>
+    <input id="settings-user" type="text" placeholder="me">
+    <div class="modal-actions">
+      <button id="settings-save-btn" class="btn primary">Зберегти</button>
+      <button id="settings-close-btn" class="btn secondary">Закрити</button>
+    </div>
+  </div>
+</div>
+
+<div id="confirm-modal" class="modal hidden">
+  <div class="modal-content">
+    <h2 id="confirm-title">Почав роботу?</h2>
+    <p id="confirm-body"></p>
+    <div class="modal-actions">
+      <button id="confirm-yes-btn" class="btn primary">Так, почати</button>
+      <button id="confirm-no-btn" class="btn secondary">Ні</button>
+    </div>
+  </div>
+</div>
+
+<datalist id="clients-list"></datalist>
+<datalist id="projects-list"></datalist>
+
+<script src="app.js"></script>
+</body>
+</html>
