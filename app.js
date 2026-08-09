@@ -1,5 +1,6 @@
 const SETTINGS_KEY = 'tt_settings';
 const PLANNED_KEY = 'tt_planned_pending';
+const DEFAULT_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbywgrvW0bP1sndabYtaDodiNCm3LP2GgvlBfLaHBKM65cJqC5bwYiPWnqr_VOMhlg2tdg/exec';
 
 function loadSettings() {
   try {
@@ -14,7 +15,7 @@ function saveSettings(s) {
 let settings = loadSettings();
 
 function baseUrl() {
-  return (settings.scriptUrl || '').replace(/\/+$/, '');
+  return (settings.scriptUrl || DEFAULT_SCRIPT_URL).replace(/\/+$/, '');
 }
 function userName() {
   return settings.user || 'me';
@@ -64,7 +65,7 @@ document.querySelectorAll('.tab-btn').forEach((btn) => {
 /* ---------- Settings modal ---------- */
 const settingsModal = document.getElementById('settings-modal');
 function openSettingsModal() {
-  document.getElementById('settings-script-url').value = settings.scriptUrl || '';
+  document.getElementById('settings-script-url').value = settings.scriptUrl || DEFAULT_SCRIPT_URL;
   document.getElementById('settings-user').value = settings.user || 'me';
   settingsModal.classList.remove('hidden');
 }
@@ -80,7 +81,6 @@ document.getElementById('settings-save-btn').addEventListener('click', () => {
   saveSettings(settings);
   settingsModal.classList.add('hidden');
 });
-if (!settings.scriptUrl) openSettingsModal();
 
 /* ---------- Timer ---------- */
 const timerDisplay = document.getElementById('timer-display');
