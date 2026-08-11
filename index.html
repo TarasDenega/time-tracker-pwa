@@ -8,6 +8,7 @@
 <link rel="icon" href="icon.svg" type="image/svg+xml">
 <meta name="theme-color" content="#0f172a">
 <link rel="stylesheet" href="styles.css">
+<script src="https://accounts.google.com/gsi/client" async defer></script>
 </head>
 <body>
 <header class="topbar">
@@ -94,6 +95,17 @@
       <button id="settings-save-btn" class="btn primary">Зберегти</button>
       <button id="settings-close-btn" class="btn secondary">Закрити</button>
     </div>
+    <div class="modal-actions">
+      <button id="settings-signout-btn" class="btn secondary">Вийти з Google</button>
+    </div>
+  </div>
+</div>
+
+<div id="auth-gate" class="modal">
+  <div class="modal-content">
+    <h2>Вхід</h2>
+    <p>Увійди Google-акаунтом, щоб користуватись трекером.</p>
+    <div id="g_id_signin"></div>
   </div>
 </div>
 

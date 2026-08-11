@@ -1,6 +1,30 @@
 const SETTINGS_KEY = 'tt_settings';
 const PLANNED_KEY = 'tt_planned_pending';
 const DEFAULT_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbywgrvW0bP1sndabYtaDodiNCm3LP2GgvlBfLaHBKM65cJqC5bwYiPWnqr_VOMhlg2tdg/exec';
+const GOOGLE_CLIENT_ID = '656479148002-43g57hp4r32oa7v9eei8vpl7ldhcsaht.apps.googleusercontent.com';
+const ID_TOKEN_KEY = 'tt_id_token';
+
+function loadIdToken() {
+  return localStorage.getItem(ID_TOKEN_KEY) || '';
+}
+function saveIdToken(token) {
+  localStorage.setItem(ID_TOKEN_KEY, token);
+}
+function clearIdToken() {
+  localStorage.removeItem(ID_TOKEN_KEY);
+}
+function idTokenExpiryMs(token) {
+  try {
+    const payload = JSON.parse(atob(token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/')));
+    return payload.exp * 1000;
+  } catch {
+    return 0;
+  }
+}
+function hasValidIdToken() {
+  const token = loadIdToken();
+  return !!token && idTokenExpiryMs(token) > Date.now();
+}
 
 function loadSettings() {
   try {
@@ -21,21 +45,28 @@ function userName() {
   return settings.user || 'me';
 }
 
+function handleApiError(message) {
+  if (message.indexOf('Unauthorized') === 0) {
+    clearIdToken();
+    showAuthGate();
+  }
+  return new Error(message);
+}
 async function apiPost(path, body) {
   const res = await fetch(`${baseUrl()}?path=${encodeURIComponent(path)}`, {
     method: 'POST',
     headers: { 'Content-Type': 'text/plain;charset=utf-8' }, // avoids CORS preflight — Apps Script doesn't handle OPTIONS
-    body: JSON.stringify({ user: userName(), ...body }),
+    body: JSON.stringify({ user: userName(), idToken: loadIdToken(), ...body }),
   });
   const data = await res.json().catch(() => null);
-  if (!data || data.ok === false) throw new Error((data && data.error) || `${path}: request failed`);
+  if (!data || data.ok === false) throw handleApiError((data && data.error) || `${path}: request failed`);
   return data;
 }
 async function apiGet(path, params = {}) {
-  const qs = new URLSearchParams({ path, user: userName(), ...params }).toString();
+  const qs = new URLSearchParams({ path, user: userName(), idToken: loadIdToken(), ...params }).toString();
   const res = await fetch(`${baseUrl()}?${qs}`);
   const data = await res.json().catch(() => null);
-  if (!data || data.ok === false) throw new Error((data && data.error) || `${path}: request failed`);
+  if (!data || data.ok === false) throw handleApiError((data && data.error) || `${path}: request failed`);
   return data;
 }
 
@@ -81,6 +112,43 @@ document.getElementById('settings-save-btn').addEventListener('click', () => {
   saveSettings(settings);
   settingsModal.classList.add('hidden');
 });
+document.getElementById('settings-signout-btn').addEventListener('click', () => {
+  clearIdToken();
+  if (window.google && google.accounts && google.accounts.id) google.accounts.id.disableAutoSelect();
+  settingsModal.classList.add('hidden');
+  showAuthGate();
+});
+
+/* ---------- Google sign-in gate ---------- */
+const authGate = document.getElementById('auth-gate');
+function showAuthGate() {
+  authGate.classList.remove('hidden');
+}
+function hideAuthGate() {
+  authGate.classList.add('hidden');
+}
+function handleCredentialResponse(response) {
+  saveIdToken(response.credential);
+  hideAuthGate();
+  initApp();
+}
+function initAuth() {
+  if (window.google && google.accounts && google.accounts.id) {
+    google.accounts.id.initialize({
+      client_id: GOOGLE_CLIENT_ID,
+      callback: handleCredentialResponse,
+      auto_select: true,
+    });
+    google.accounts.id.renderButton(document.getElementById('g_id_signin'), { theme: 'outline', size: 'large', width: 300 });
+    google.accounts.id.prompt();
+  }
+  if (hasValidIdToken()) {
+    hideAuthGate();
+    initApp();
+  } else {
+    showAuthGate();
+  }
+}
 
 /* ---------- Timer ---------- */
 const timerDisplay = document.getElementById('timer-display');
@@ -378,13 +446,16 @@ async function refreshHistory() {
 document.getElementById('history-refresh-btn').addEventListener('click', refreshHistory);
 
 /* ---------- Init ---------- */
-renderTimerQuickSlots();
-renderPlannedList();
-loadLists();
-restoreTimerState();
-
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('service-worker.js').catch(() => {});
-  });
+function initApp() {
+  renderTimerQuickSlots();
+  renderPlannedList();
+  loadLists();
+  restoreTimerState();
 }
+
+window.addEventListener('load', () => {
+  initAuth();
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('service-worker.js').catch(() => {});
+  }
+});
