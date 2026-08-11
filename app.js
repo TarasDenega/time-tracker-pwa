@@ -199,7 +199,7 @@ function endLocalTimer(row) {
   timerStartMs = null;
   clearInterval(timerInterval);
   timerDisplay.textContent = '00:00:00';
-  timerMeta.textContent = row && row.Hours !== undefined ? `Записано: ${row.Hours} год${row.Amount ? ' · € ' + row.Amount : ''}` : '';
+  timerMeta.textContent = row && row.Hours !== undefined ? `Записано: ${row.Hours}${row.Amount ? ' · € ' + row.Amount : ''}` : '';
   setRunningUI(false);
 }
 
@@ -446,7 +446,8 @@ async function refreshHistory() {
       const tr = document.createElement('tr');
       const hours = r.Hours === '' || r.Hours == null ? '' : r.Hours;
       const amount = r.Amount === '' || r.Amount == null ? '' : `€ ${r.Amount}`;
-      tr.innerHTML = `<td>${r.Date || ''}</td><td>${r.Client || ''}</td><td>${r.Project || ''}</td><td>${hours}</td><td>${amount}</td><td>${r.Status || ''}</td>`;
+      const status = r.Status ? `<span class="status-pill">${r.Status}</span>` : '';
+      tr.innerHTML = `<td>${r.Date || ''}</td><td>${r.Client || ''}</td><td>${r.Project || ''}</td><td class="num">${hours}</td><td class="num">${amount}</td><td>${status}</td>`;
       tbody.appendChild(tr);
     });
   } catch (e) {

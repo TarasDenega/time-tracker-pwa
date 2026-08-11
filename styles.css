@@ -152,13 +152,38 @@ input:focus { outline: none; border-color: var(--accent); }
   justify-content: space-between;
 }
 
-.entries-table { width: 100%; border-collapse: collapse; margin-top: 0.75rem; font-size: 0.85rem; }
+.table-wrap {
+  margin-top: 0.75rem;
+  overflow-x: auto;
+  border: 1px solid var(--surface-2);
+  border-radius: 10px;
+}
+.entries-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
 .entries-table th, .entries-table td {
   text-align: left;
-  padding: 0.4rem 0.3rem;
-  border-bottom: 1px solid var(--surface-2);
+  padding: 0.55rem 0.6rem;
+  white-space: nowrap;
 }
-.entries-table th { color: var(--text-dim); font-weight: 500; }
+.entries-table thead th {
+  background: var(--surface-2);
+  color: var(--text-dim);
+  font-weight: 600;
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+.entries-table tbody td { border-top: 1px solid rgba(148, 163, 184, 0.12); }
+.entries-table tbody tr:nth-child(even) { background: rgba(148, 163, 184, 0.05); }
+.entries-table tbody tr:hover { background: rgba(34, 211, 238, 0.08); }
+.entries-table .num { text-align: right; font-variant-numeric: tabular-nums; }
+.status-pill {
+  display: inline-block;
+  padding: 0.15rem 0.55rem;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  background: var(--surface-2);
+  color: var(--text-dim);
+}
 
 .modal {
   position: fixed;
