@@ -48,7 +48,14 @@ function userName() {
 function handleApiError(message) {
   if (message.indexOf('Unauthorized') === 0) {
     clearIdToken();
-    showAuthGate();
+    if (message.indexOf('wrong account') !== -1) {
+      // Otherwise auto_select silently signs back in with the same rejected
+      // account on the next load, reproducing the same silent bounce.
+      if (window.google && google.accounts && google.accounts.id) google.accounts.id.disableAutoSelect();
+      showAuthGate('Доступ заборонено для цього акаунта. Увійди правильним акаунтом.');
+    } else {
+      showAuthGate();
+    }
   }
   return new Error(message);
 }
@@ -121,7 +128,10 @@ document.getElementById('settings-signout-btn').addEventListener('click', () => 
 
 /* ---------- Google sign-in gate ---------- */
 const authGate = document.getElementById('auth-gate');
-function showAuthGate() {
+const authGateStatus = document.getElementById('auth-gate-status');
+function showAuthGate(message) {
+  authGateStatus.textContent = message || '';
+  authGateStatus.classList.toggle('hidden', !message);
   authGate.classList.remove('hidden');
 }
 function hideAuthGate() {
